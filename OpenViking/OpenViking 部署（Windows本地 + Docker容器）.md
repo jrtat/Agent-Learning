@@ -4,6 +4,15 @@
 
 > data：2026/10/16
 
+## 0. 序
+
+> Openviking 项目网址：https://github.com/volcengine/OpenViking
+
+> OpenViking 官方指南：https://docs.openviking.ai/zh/agent-integrations/17-dsh#%E5%B7%A5%E4%BD%9C%E6%96%B9%E5%BC%8F
+
+官方指南的问题在于没有告诉你怎么部署OpenViking服务端，事实上，服务端可以在本地，可以托管（火山引擎自家就是干这个的）。
+对Windows用户，想在本地跑最好还是使用Docker，下面是我和大肥鱼激情交互后，经大肥鱼总结，我简单校对后得到的文档。
+
 ## 1. 架构总览
 
 ```
