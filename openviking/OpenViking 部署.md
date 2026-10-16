@@ -2,15 +2,16 @@
 
 > 指在windows端，以docker的形式在本地运行openviking的服务端，并以插件形式接入deepseek harness。
 
+> data：2026/10/16
+
 ## 架构总览
 
 ```
-
 ┌─────────────────────────────────────────────────────────┐
 │  DSH (web profile)                                      │
 │   ├─ 插件 @openviking/dsh-memory-plugin  ← 第3步装       │
-│   └─ 读 ~/.openviking/ovcli.conf        ← 第5步写       │
-│        (url + user key)                                  │
+│   └─ 读 ~/.openviking/ovcli.conf        ← 第5步写        │
+│        (url + user key)                                 │
 └────────────────────┬────────────────────────────────────┘
                      │ HTTP (1933)
 ┌────────────────────▼────────────────────────────────────┐
@@ -18,11 +19,10 @@
 │   ├─ 读 ~/.openviking/ov.conf          ← 第4步写         │
 │   │    ├─ server (root_api_key, 0.0.0.0:1933)           │
 │   │    ├─ storage (local 向量库)                         │
-│   │    ├─ embedding → Cloudflare @cf/baai/bge-m3 (1024)  │
+│   │    ├─ embedding → Cloudflare @cf/baai/bge-m3 (1024) │
 │   │    └─ vlm → 方舟 Agent Plan deepseek-v4.1-flash      │
 │   └─ 数据存 ~/.openviking/data/                          │
 └─────────────────────────────────────────────────────────┘
-
 ```
 
 两个模型的职责：
@@ -45,8 +45,6 @@
 
 ## 第 0 步：准备 3 个密钥
 
-三个密钥互相独立，别混用：
-
 | 密钥 |  用途 |
 |---|---|
 | embedding 模型 | Cloudflare 控制台（Workers AI 权限） | embedding 向量化 |
@@ -61,6 +59,10 @@
 
 ```
 
+> 上述指令的作用：生成一个 40 位的随机字符串，用来当root_api_key。
+> `user key` 是 OpenViking 服务端在「创建用户」时当场签发的一串凭证。
+> 「你」用root key调管理接口 或 打开Web Studio，然后服务端创建一个用户（如 user_id = jrtat），接着服务端签发一个user_key并返回给「你」，「你」把它填进ovcli.conf。
+
 ## 第 1 步：安装 WSL2 + Ubuntu
 
 ```powershell
@@ -74,7 +76,7 @@ wsl -l -v
 # 应看到 Ubuntu 且 VERSION = 2
 ```
 
----
+> 安装Ubuntu需要开（全局）代理。
 
 ## 第 2 步：安装 Docker Desktop
 
@@ -87,24 +89,22 @@ docker --version
 docker run --rm hello-world
 ```
 
-看到 `Hello from Docker!` 即成功。**别跳过这步**——hello-world 通了才说明整条链是通的。
-
----
+> 看到 `Hello from Docker!` 即成功。
 
 ## 第 3 步：安装 DSH 插件
 
 ```powershell
-dsh plugin --profile web add @openviking/dsh-memory-plugin
+(pnpm) dsh plugin --profile web add @openviking/dsh-memory-plugin
 ```
 
 验证：
 
 ```powershell
-dsh --profile web --dump-config
+(pnpm) dsh --profile web --dump-config
 # 应看到 openviking-memory-runtime 条目
 ```
 
----
+> 如果不能直接使用dsh，可以尝试在前面加pnpm。
 
 ## 第 4 步：写服务端配置 `ov.conf`
 
