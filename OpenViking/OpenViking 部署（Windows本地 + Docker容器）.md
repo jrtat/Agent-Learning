@@ -20,7 +20,7 @@
 │  DSH (web profile)                                      │
 │   ├─ 插件 @openviking/dsh-memory-plugin  ← 第3步装       │
 │   └─ 读 ~/.openviking/ovcli.conf        ← 第5步写        │
-│        (url + user key)                                 │
+│        (url ("http://localhost:1933") + user key)                                 │
 └────────────────────┬────────────────────────────────────┘
                      │ HTTP (1933)
 ┌────────────────────▼────────────────────────────────────┐
