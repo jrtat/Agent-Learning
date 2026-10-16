@@ -316,3 +316,5 @@ curl.exe http://127.0.0.1:1933/health // 验证服务健康
 # 期望：{"status":"ok","healthy":true,...}
 
 ```
+
+> 启动后可以在：http://localhost:1933/studio/home 中查看Studio的详细内容（需要配置`user key`和`root key`）。
