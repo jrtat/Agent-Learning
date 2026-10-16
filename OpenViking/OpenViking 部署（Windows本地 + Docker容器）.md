@@ -28,8 +28,8 @@
 │   ├─ 读 ~/.openviking/ov.conf          ← 第4步写         │
 │   │    ├─ server (root_api_key, 0.0.0.0:1933)           │
 │   │    ├─ storage (local 向量库)                         │
-│   │    ├─ embedding → Cloudflare @cf/baai/bge-m3 (1024) │
-│   │    └─ vlm → 方舟 Agent Plan deepseek-v4.1-flash      │
+│   │    ├─ embedding                                     │
+│   │    └─ vlm                                           │
 │   └─ 数据存 ~/.openviking/data/                          │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -49,10 +49,10 @@
 |---|---|
 | WSL2 + Ubuntu | Docker 运行时 |
 | Docker Desktop | 跑服务端的容器 |
-| Cloudflare | 上有免费 embedding 模型 |
+| 任意服务商| 上有免费 embedding 模型 |
 | 任意服务商 | 能提供 VLM 模型 |
 
-> embedding也可在本地跑。
+> embedding采用Cloudflare，有免费额度，也可在本地跑。
 
 ---
 
@@ -60,7 +60,7 @@
 
 | 密钥 |  用途 |
 |---|---|
-| embedding 模型 | Cloudflare 控制台（Workers AI 权限） | embedding 向量化 |
+| embedding 模型 | embedding 向量化 |
 | VLM 模型 |  VLM 记忆抽取 |
 | root_api_key（自己生成） |  服务端管理员密钥 |
 
@@ -75,7 +75,7 @@
 > 上述指令的作用：生成一个40位的随机字符串，用来当root_api_key。
 > `user key` 是 OpenViking 服务端在「创建用户」时当场签发的一串凭证。
 > `root key` 没有任何机构或网站发给你。「你」在 `ov.conf` 里写什么，它就是什么。
-> 「你」用`root key`调管理接口 或 打开Web Studio，然后服务端创建一个用户（如 user_id = jrtat），接着服务端签发一个`user_key`并返回给「你」，「你」把它填进`ovcli.conf`中。
+> 「你」用`root key`调管理接口 或 打开Web Studio，然后服务端创建一个用户（如`user_id = jrtat`），接着服务端签发一个`user_key`并返回给「你」，「你」把它填进`ovcli.conf`中。
 
 ---
 
@@ -98,7 +98,7 @@ wsl -l -v
 
 ## 第 2 步：安装 Docker Desktop
 
-从 [docker.com](https://www.docker.com/products/docker-desktop/) 下载安装（Windows 11 家庭版自动用 WSL2 后端）。
+从 [docker.com](https://www.docker.com/products/docker-desktop/) 下载安装桌面版Docker。
 
 验证：
 
@@ -124,7 +124,7 @@ docker run --rm hello-world
 # 应看到 openviking-memory-runtime 条目
 ```
 
-> 如果不能直接使用dsh，可以尝试在前面加pnpm。
+> 如果本身除了直接clone dsh的仓库，没有下额外的东西，需要在指令前面加pnpm。
 
 ---
 
@@ -143,15 +143,15 @@ docker run --rm hello-world
     "workspace": "./data",
     "vectordb": { "name": "context", "backend": "local" },
     "agfs": { "backend": "local" }
-  },
+  }, 
   "embedding": {
     "dense": {
       "provider": "根据具体情况填写",
       "api_base": "根据具体情况填写",
       "api_key": "根据具体情况填写",
       "model": "根据具体情况填写",
-      "dimension": 1024,
-      "encoding_format": "float"
+      "dimension": "根据具体情况填写",
+      "encoding_format": "根据具体情况填写"
     }
   },
   "vlm": {
@@ -159,17 +159,19 @@ docker run --rm hello-world
     "api_base": "根据具体情况填写",
     "api_key": "根据具体情况填写",
     "model": "根据具体情况填写",
-    "temperature": 0.1,
-    "max_retries": 3,
-    "max_tokens": 4096,
-    "timeout": 120
-  }
+    "temperature": "根据具体情况填写",
+    "max_retries": "根据具体情况填写",
+    "max_tokens": "根据具体情况填写",
+    "timeout": "根据具体情况填写"
+  } 
 }
 ```
 
+> storage这么填的原因暂时还不太明白。
+
 关键点：
 
-- `root_api_key` 必须有——容器内绑 `0.0.0.0` 时没有它会拒绝启动。
+- `root_api_key` 必须有——容器内绑 `0.0.0.0`时，没有它会拒绝启动。
 
 改完验证 JSON（每次必做）：
 
@@ -183,7 +185,7 @@ Get-Content "$env:USERPROFILE\.openviking\ov.conf" -Raw | ConvertFrom-Json | Out
 
 ## 第 5 步：启动服务端容器（先于ovcli.conf）
 
-> 先后依赖：`ovcli.conf` 需要`user key`，`user key`要服务端起来后才能拿到，所以**先启动容器再写 `ovcli.conf`**。
+> 先后依赖：`ovcli.conf`需要`user key`，`user key`要服务端起来后才能拿到，所以**先启动容器再写 `ovcli.conf`**。
 
 ```powershell
 docker run -d --name openviking -p 1933:1933 `
@@ -311,8 +313,7 @@ docker start openviking // 启动容器，容器名字是前面注册好的
 
 docker ps --filter name=openviking --format '{{.Names}} | {{.Status}}' // 验证服务健康
 # 期望：openviking | Up xx seconds (healthy)
-
-curl.exe http://127.0.0.1:1933/health // 验证服务健康
+curl.exe http://127.0.0.1:1933/health
 # 期望：{"status":"ok","healthy":true,...}
 
 ```
