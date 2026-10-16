@@ -2,7 +2,7 @@
 
 > 指在windows端，以docker的形式在本地运行openviking的服务端，并以插件形式接入deepseek harness。
 
-> data：2026/10/16
+> date：2026/10/16
 
 ## 序言
 
