@@ -80,7 +80,7 @@ viking://user/jrtat/
 
 OpenViking 的检索可以概括为：
 
-```text
+```markdown
 用户查询
   ↓
 **查询意图**分析
